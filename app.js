@@ -10,6 +10,9 @@ const enableGlobalErrorLogging = process.env.ENABLE_GLOBAL_ERROR_LOGGING === 'tr
 // create the Express app
 const app = express();
 
+// import instance of sequelize 
+const sequelize = require('./models/index').sequelize;
+
 // setup morgan which gives us http request logging
 app.use(morgan('dev'));
 
@@ -38,6 +41,27 @@ app.use((err, req, res, next) => {
     error: {},
   });
 });
+
+(async () => {
+  try {
+    // Test the connection to the database
+    await sequelize.authenticate();
+    console.log('Connection to the database successful!');
+
+
+    // Sync the models
+    await sequelize.sync();
+    console.log('Synchronizing the models with the database...');
+
+  } catch (error) {
+    if (error.name === 'SequelizeValidationError') {
+      const errors = error.errors.map(err => err.message);
+      console.error('Validation errors: ', errors);
+    } else {
+      throw error;
+    }
+  }
+})();
 
 // set our port
 app.set('port', process.env.PORT || 5000);
