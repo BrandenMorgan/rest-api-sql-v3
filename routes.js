@@ -42,9 +42,21 @@ router.get('/allusers', async (req, res) => {
 // /api/users POST route to create new user. Set Location header to '/'
 // Return a 201 HTTP status no content
 router.post('/users', async (req, res) => {
-    await User.create(req.body);
-    res.location('/');
-    res.status(201).json({ "message": "Account successfully created!" });
+    try {
+        await User.create(req.body);
+        res.location('/');
+        res.status(201).end();
+    } catch (error) {
+        console.error("ERROR: ", error.name);
+
+        if (error.name === "SequelizeValidationError" || error.name === "SequelizeUniqueConstraintError") {
+            const errors = error.errors.map(err => err.message);
+            res.status(400).json({ errors });
+        } else {
+            throw error;
+        }
+    }
+
 
 });
 
@@ -78,14 +90,23 @@ router.get('/courses/:id', async (req, res) => {
 // /api/courses POST route to create new course. Set Location header in URI
 //  for newly created course, return a 201 HTTP status code and no content
 router.post('/courses', authenticateUser, async (req, res) => {
-    await Course.create(req.body);
-    // res.location(`/courses/${req.params.id}`);
+    const course = await Course.create(req.body);
+    res.location(`/courses/${course.id}`);
     res.status(201).json({ "message": "Course successfully created" });
 });
 
 // /api/courses/:id PUT route to update course. Return 204 HTTP no content
+router.put('/courses/:id', async (req, res) => {
+    const course = await Course.findByPk(req.params.id);
+    await course.update(req.body);
+    res.status(204).end();
+});
 
 // /api/courses/:id DELETE route to delete course. Return 204 HTTP no content
-
+router.delete('/courses/:id', async (req, res) => {
+    const course = await Course.findByPk(req.params.id);
+    await course.destroy();
+    res.status(204).end();
+});
 
 module.exports = router;
