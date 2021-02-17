@@ -52,6 +52,7 @@ app.use((err, req, res, next) => {
     await sequelize.sync();
     console.log('Synchronizing the models with the database...');
 
+    // Catch any errors
   } catch (error) {
     if (error.name === 'SequelizeValidationError') {
       const errors = error.errors.map(err => err.message);
