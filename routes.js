@@ -56,7 +56,6 @@ router.post('/users', asyncHandler(async (req, res) => {
 // return a 200 status code
 router.get('/courses', asyncHandler(async (req, res) => {
     const courses = await Course.findAll({
-        // Filter user?
         // Return all courses with their associated User
         include: [
             {

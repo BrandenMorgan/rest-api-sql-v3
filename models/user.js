@@ -62,7 +62,7 @@ module.exports = (sequelize) => {
                 // Require a length between 6 and 20 characters
                 len: {
                     args: [6, 20],
-                    msg: 'The password should be between 2 and 20 characters in length'
+                    msg: 'The password should be between 6 and 20 characters in length'
                 }
             }
         }

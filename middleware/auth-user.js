@@ -21,17 +21,15 @@ exports.authenticateUser = async (req, res, next) => {
     if (credentials) {
         /*
             Attempt to retrieve the user from the data store by their
-            username (i.e. the users "key" from the Authorization header)
+            email (i.e. the users "key" from the Authorization header)
         */
         const user = await User.findOne({ where: { emailAddress: credentials.name } });
         if (user) {
-            // console.log(user);
-            console.log(user.password);
             /*
                 If a user was successfully retrieved from the data store
                 use the bcryptjs npm package to compare the user's password
                 (from the Authorization header) to the user's password
-                that was retrieved gtom the data store.
+                that was retrieved from the data store.
              */
             const authenticated = bcrypt
                 .compareSync(credentials.pass, user.password);
