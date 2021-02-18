@@ -58,28 +58,30 @@ router.get('/courses', asyncHandler(async (req, res) => {
     const courses = await Course.findAll({
         // Filter user?
         // Return all courses with their associated User
-        include: User,
+        include: [
+            {
+                model: User,
+                attributes: ['id', 'firstName', 'lastName', 'emailAddress']
+            }
+        ],
         // Filter results returning only certain columns
-        attributes: ['title', 'description', 'estimatedTime', 'materialsNeeded']
+        attributes: ['id', 'title', 'description', 'estimatedTime', 'materialsNeeded']
     });
-    // Refer to value from an associated model
-    // const courses = await Course.findAll({
-    //     include: {
-    //         model: User,
-    //         where: {
-    //             id: Sequelize.col('course.id')
-    //         }
-    //     }
-    // });
-    // Automatic?
     res.status(200).json(courses);
 }));
 
 // /api/courses/:id GET route that will return the corresponding course along
 //  with the User that owns it and a 200 HTTP status code
-// Returns userId. Do I need all user data?
 router.get('/courses/:id', asyncHandler(async (req, res) => {
-    const course = await Course.findByPk(req.params.id);
+    const course = await Course.findByPk(req.params.id, {
+        include: [
+            {
+                model: User,
+                attributes: ['id', 'firstName', 'lastName', 'emailAddress']
+            }
+        ],
+        attributes: ['id', 'title', 'description', 'estimatedTime', 'materialsNeeded']
+    });
     if (course) {
         // 200 success status
         res.status(200).json(course);
@@ -120,8 +122,6 @@ router.put('/courses/:id', authenticateUser, asyncHandler(async (req, res) => {
             // Only allow user to update a course if they own it
             if (currentUserId === courseOwnerId) {
                 await course.update(req.body);
-                // Validation firing?
-                // console.log(typeof course.title);
                 // 204 No Content success status
                 res.status(204).end();
             } else {
